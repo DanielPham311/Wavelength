@@ -1,0 +1,87 @@
+### Wavelength API — Auth endpoints
+### Place this file at your project root and open with the REST Client VSCode extension
+
+@baseUrl = http://localhost:8080/api
+@contentType = application/json
+
+# ── 1. Register ───────────────────────────────────────────────────────────────
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@wavelength.com",
+  "password": "securepassword123",
+  "displayName": "Test User"
+}
+
+###
+
+# ── 2. Login ──────────────────────────────────────────────────────────────────
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@wavelength.com",
+  "password": "securepassword123"
+}
+
+###
+
+# ── 3. Get current user ───────────────────────────────────────────────────────
+@accessToken = PASTE_ACCESS_TOKEN_HERE
+
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ── 4. Refresh tokens ─────────────────────────────────────────────────────────
+@refreshToken = PASTE_REFRESH_TOKEN_HERE
+
+POST {{baseUrl}}/auth/refresh
+Content-Type: {{contentType}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+# ── 5. Logout ─────────────────────────────────────────────────────────────────
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ── 6. Duplicate email — expect 409 ──────────────────────────────────────────
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@wavelength.com",
+  "password": "anotherpassword",
+  "displayName": "Duplicate"
+}
+
+###
+
+# ── 7. Wrong password — expect 401 ───────────────────────────────────────────
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "testuser@wavelength.com",
+  "password": "wrongpassword"
+}
+
+###
+
+# ── 8. Validation errors — expect 400 with field errors ──────────────────────
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "not-an-email",
+  "password": "short",
+  "displayName": ""
+}
