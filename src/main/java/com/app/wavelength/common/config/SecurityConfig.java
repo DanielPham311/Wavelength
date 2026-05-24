@@ -36,11 +36,11 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/songs/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/artists/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/albums/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/search").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/songs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/artists/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/albums/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/swagger-ui.html",
