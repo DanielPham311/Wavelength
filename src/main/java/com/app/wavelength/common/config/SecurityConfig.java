@@ -36,16 +36,21 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // ── Public ────────────────────────────────────────────────
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/songs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/artists/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/albums/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/search").permitAll()
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**").permitAll()
-                .requestMatchers("/api/songs/upload").hasRole("ARTIST")
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+
+                // ── Authenticated only — must come before the broad songs permitAll ──
+                .requestMatchers("/api/v1/songs/upload").hasRole("ARTIST")
+                .requestMatchers("/api/v1/songs/*/stream").authenticated()
+
+                // ── Public song browsing (metadata only, no stream URL) ───
+                .requestMatchers(HttpMethod.GET, "/api/v1/songs/**").permitAll()
+
+                // ── Everything else requires JWT ──────────────────────────
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
