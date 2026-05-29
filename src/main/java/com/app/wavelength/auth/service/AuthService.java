@@ -89,8 +89,8 @@ public class AuthService {
 
     private AuthResponse issueTokenPair(User user) {
         String accessToken  = jwtUtil.generateAccessToken(
-                user.getId(), user.getEmail(), user.getRole().name());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getId());
+                user.getID(), user.getEmail(), user.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getID());
         persistRefreshToken(user, refreshToken);
         return new AuthResponse(accessToken, refreshToken, AuthResponse.UserSummary.from(user));
     }

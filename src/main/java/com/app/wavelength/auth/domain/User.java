@@ -33,7 +33,7 @@ import lombok.Setter;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID ID;
 
     @Column(nullable = false, unique = true, length = 255)
     private String email;

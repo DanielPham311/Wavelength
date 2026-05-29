@@ -1,0 +1,55 @@
+package com.app.wavelength.library.service;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.app.wavelength.catalog.dto.SongResponse;
+import com.app.wavelength.catalog.service.SongService;
+import com.app.wavelength.library.domain.LikedSong;
+import com.app.wavelength.library.repository.LikedSongRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class LikedSongService {
+    private final LikedSongRepository likedSongRepository;
+    private final SongService songService; 
+
+    //Toggle like/unlike a song
+    public boolean toggleLike(UUID userID, UUID songID) {
+        if (likedSongRepository.existsByUserIDAndSongID(userID, songID)) {
+            likedSongRepository.deleteByUserIdAndSongId(userID, songID);
+            return false; // Unliked
+        }
+
+        LikedSong likedSong = LikedSong.builder()
+                .userID(userID)
+                .songID(songID)
+                .build();
+        likedSongRepository.save(likedSong);
+        return true; // Liked
+    }
+
+    @Transactional(readOnly = true)
+    public List<SongResponse> getLikedSongs(UUID userId, int limit, int offset) {
+        Page<LikedSong> page = likedSongRepository
+                .findByUserIDOrderByLikedAtDesc(userId,
+                        PageRequest.of(offset / limit, limit));
+
+        return page.getContent()
+                .stream()
+                .map(ls -> songService.getSongByID(ls.getSongID()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isLiked(UUID userId, UUID songId) {
+        return likedSongRepository.existsByUserIDAndSongID(userId, songId);
+    }
+}

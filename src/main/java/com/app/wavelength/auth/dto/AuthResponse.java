@@ -17,7 +17,7 @@ public record AuthResponse(
     ) {
         public static UserSummary from(User user) {
             return new UserSummary(
-                    user.getId(),
+                    user.getID(),
                     user.getEmail(),
                     user.getDisplayName(),
                     user.getAvatarUrl(),
