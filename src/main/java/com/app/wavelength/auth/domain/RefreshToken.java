@@ -32,7 +32,7 @@ import lombok.Setter;
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID ID;
 
     @Column(name = "tokenHash", nullable = false, unique = true, length = 64)
     private String tokenHash;
