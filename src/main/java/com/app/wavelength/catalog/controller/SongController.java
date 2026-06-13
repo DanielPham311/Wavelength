@@ -19,7 +19,7 @@ public class SongController {
     // GET /api/v1/songs/{id} — metadata only, no stream URL
     @GetMapping("/{id}")
     public ResponseEntity<SongResponse> getSong(@PathVariable UUID id) {
-        return ResponseEntity.ok(songService.getSongByID(id));
+        return ResponseEntity.ok(songService.getSongById(id));
     }
 
     // GET /api/v1/songs/trending?limit=50

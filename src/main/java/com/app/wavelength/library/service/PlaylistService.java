@@ -35,7 +35,7 @@ public class PlaylistService {
 
         // Public playlists are readable by anyone
         // Private playlists only by owner
-        if (!playlist.getIsPublic() && !playlist.getOwnerID().equals(userId)) {
+        if (!playlist.getIsPublic() && !playlist.getOwnerId().equals(userId)) {
             throw new SecurityException("You do not have access to this playlist");
         }
 
@@ -43,7 +43,7 @@ public class PlaylistService {
     }
 
     private void shiftPositionsDown(UUID playlistId, int fromPosition, int shiftBy) {
-        playlistSongRepository.findByPlaylistIDOrderByPositionAsc(playlistId)
+        playlistSongRepository.findByPlaylistIdOrderByPositionAsc(playlistId)
                 .stream()
                 .filter(ps -> ps.getPosition() >= fromPosition)
                 .forEach(ps -> {
@@ -54,12 +54,12 @@ public class PlaylistService {
 
     //Create
     @Transactional
-    public PlaylistResponse createPlaylist(CreatePlaylistRequest request, UUID ownerID) {
+    public PlaylistResponse createPlaylist(CreatePlaylistRequest request, UUID ownerId) {
         Playlist playlist = Playlist.builder()
-                .ownerID(ownerID)
+                .ownerId(ownerId)
                 .name(request.name().trim())
                 .description(request.description())
-                .coverURL(request.coverURL())
+                .coverUrl(request.coverUrl())
                 .isPublic(request.isPublic())
                 .build();
 
@@ -69,58 +69,58 @@ public class PlaylistService {
 
     //Get single playlist
     @Transactional(readOnly = true)
-    public PlaylistResponse getByID(UUID playlistID, boolean includeSongs, UUID requesterID) {
-        Playlist playlist = findAndAuthorize(playlistID, requesterID);
+    public PlaylistResponse getById(UUID playlistId, boolean includeSongs, UUID requesterID) {
+        Playlist playlist = findAndAuthorize(playlistId, requesterID);
 
         List<SongResponse> songs = List.of();
         if (includeSongs) {
             songs = playlistSongRepository
-                    .findByPlaylistIDOrderByPositionAsc(playlistID)
+                    .findByPlaylistIdOrderByPositionAsc(playlistId)
                     .stream()
-                    .map(ps -> songService.getSongByID(ps.getSongID()))
+                    .map(ps -> songService.getSongById(ps.getSongId()))
                     .toList();
         }
-        int trackCount = playlistSongRepository.countByPlaylistId(playlistID);
+        int trackCount = playlistSongRepository.countByPlaylistId(playlistId);
         return PlaylistResponse.from(playlist, trackCount, songs);
     }
 
     // Get all playlists for a user
     @Transactional(readOnly = true)
-    public List<PlaylistResponse> getUsersPlaylists(UUID userID) {
-        return playlistRepository.findByOwnerIdOrderByUpdatedAtDesc(userID)
+    public List<PlaylistResponse> getUsersPlaylists(UUID userId) {
+        return playlistRepository.findByOwnerIdOrderByUpdatedAtDesc(userId)
                 .stream()
                 .map(p -> PlaylistResponse.from(p,
-                        playlistSongRepository.countByPlaylistId(p.getID()),
+                        playlistSongRepository.countByPlaylistId(p.getId()),
                         List.of()))
                 .toList();
     }
 
     // Add songs (bulk, with position handling)
     @Transactional
-    public PlaylistResponse addSongsToPlaylist(UUID playlistID, AddSongRequest request, UUID userID) {
-        Playlist playlist = findAndAuthorize(playlistID, userID);
+    public PlaylistResponse addSongsToPlaylist(UUID playlistId, AddSongRequest request, UUID userId) {
+        Playlist playlist = findAndAuthorize(playlistId, userId);
 
         int startPosition = request.position() != null
                 ? request.position()
-                : playlistSongRepository.countByPlaylistId(playlistID);
+                : playlistSongRepository.countByPlaylistId(playlistId);
 
         //Shift songs down if inserting in the middle to make space
         if (request.position() != null) {
-            shiftPositionsDown(playlistID, startPosition, request.songIDs().size());
+            shiftPositionsDown(playlistId, startPosition, request.songIds().size());
         }
 
         AtomicInteger positionCounter = new AtomicInteger(startPosition);
-        request.songIDs().forEach(songID -> {
+        request.songIds().forEach(songId -> {
             //Skip duplicates
-            if (!playlistSongRepository.existsByPlaylistIDAndSongID(playlistID, songID)) {
+            if (!playlistSongRepository.existsByPlaylistIdAndSongId(playlistId, songId)) {
                 PlaylistSong ps = new PlaylistSong();
-                ps.setPlaylistID(playlistID);
-                ps.setSongID(songID);
+                ps.setPlaylistId(playlistId);
+                ps.setSongId(songId);
                 ps.setPosition(positionCounter.getAndIncrement());
                 playlistSongRepository.save(ps);
             }
         });
-        int trackCount = playlistSongRepository.countByPlaylistId(playlistID);
+        int trackCount = playlistSongRepository.countByPlaylistId(playlistId);
         return PlaylistResponse.from(playlist, trackCount, List.of());
     }
 

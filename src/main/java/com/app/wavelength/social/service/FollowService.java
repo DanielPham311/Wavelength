@@ -26,8 +26,8 @@ public class FollowService {
             followRepository.deleteByFollowerIdAndArtistId(followerId, artistId);
         } else {
             UserArtistFollow follow = UserArtistFollow.builder()
-                    .followerID(followerId)
-                    .artistID(artistId)
+                    .followerId(followerId)
+                    .artistId(artistId)
                     .build();
             followRepository.save(follow);
         }
@@ -46,7 +46,7 @@ public class FollowService {
     public List<UUID> getFollowedArtistIds(UUID userId) {
         return followRepository.findByFollowerIdOrderByFollowedAtDesc(userId)
                 .stream()
-                .map(UserArtistFollow::getArtistID)
+                .map(UserArtistFollow::getArtistId)
                 .toList();
     }
 

@@ -14,11 +14,11 @@ import com.app.wavelength.library.domain.PlaylistSong;
 @Repository
 public interface PlaylistSongRepository extends JpaRepository<PlaylistSong, UUID>{
 
-    List<PlaylistSong> findByPlaylistIDOrderByPositionAsc(UUID playlistID);
+    List<PlaylistSong> findByPlaylistIdOrderByPositionAsc(UUID playlistId);
 
-    Optional<PlaylistSong> findByPlaylistIDAndSongID(UUID playlistID, UUID songID);
+    Optional<PlaylistSong> findByPlaylistIdAndSongId(UUID playlistId, UUID songId);
 
-    boolean existsByPlaylistIDAndSongID(UUID playlistID, UUID songID);
+    boolean existsByPlaylistIdAndSongId(UUID playlistId, UUID songId);
 
     @Modifying
     @Query("DELETE FROM PlaylistSong ps WHERE ps.playlistId = :playlistId " +

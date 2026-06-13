@@ -8,17 +8,17 @@ import com.app.wavelength.catalog.domain.Song;
 public record SongResponse(
     UUID id,
     String title,
-    UUID artistID,
+    UUID artistId,
     String artistName,
-    UUID albumID,
+    UUID albumId,
     String albumTitle,
     Integer durationSeconds,
     Integer bitrate,
-    String coverURL,
+    String coverUrl,
     Integer playCount,
     String uploadStatus,
-    String signedHlsURL,
-    Instant streamURLExpiresAt,
+    String signedHlsUrl,
+    Instant streamUrlExpiresAt,
     Instant createdAt
 ) {
 
@@ -28,9 +28,9 @@ public record SongResponse(
                 song.getUploadStatus().name(), null, null, song.getCreatedAt());
     }
 
-    public SongResponse withStreamURL(String hlsURL, Instant expiresAt) {
-        return new SongResponse(this.id, this.title, this.artistID, this.artistName, this.albumID, this.albumTitle,
-                this.durationSeconds, this.bitrate, this.coverURL, this.playCount, this.uploadStatus,
-                hlsURL, expiresAt, this.createdAt);
+    public SongResponse withStreamUrl(String hlsUrl, Instant expiresAt) {
+        return new SongResponse(this.id, this.title, this.artistId, this.artistName, this.albumId, this.albumTitle,
+                this.durationSeconds, this.bitrate, this.coverUrl, this.playCount, this.uploadStatus,
+                hlsUrl, expiresAt, this.createdAt);
     }
 }

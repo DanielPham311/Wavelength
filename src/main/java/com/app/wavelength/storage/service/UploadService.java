@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.app.wavelength.catalog.domain.Song;
-import com.app.wavelength.catalog.repository.SongRepository;
+import com.app.wavelength.catalog.service.SongService;
 import com.app.wavelength.storage.dto.UploadResponse;
 import com.app.wavelength.storage.dto.UploadRequest;
 
@@ -23,7 +23,7 @@ import com.app.wavelength.storage.dto.UploadRequest;
 public class UploadService {
     private final S3StorageService s3StorageService;
     private final TranscodeService transcodeService;
-    private final SongRepository songRepository;
+    private final SongService songService;
 
     private static final Set<String> ALLOWED_TYPES = Set.of("audio/mpeg", "audio/wav", "audio/flac", "audio/aac", "audio/ogg");
 
@@ -73,7 +73,7 @@ public class UploadService {
         song.setCoverUrl(request.coverUrl());
         song.setStoragePath(storagePath);
         song.setUploadStatus(Song.UploadStatus.PENDING);
-        songRepository.save(song);
+        songService.saveSong(song);
 
         // ── Save raw file to temp disk ─────────────────────────────────────
         Path tempDir  = Path.of(System.getProperty("java.io.tmpdir"), "wavelength", songId.toString());
@@ -84,7 +84,7 @@ public class UploadService {
             file.transferTo(tempFile);
         } catch (IOException e) {
             log.error("Failed to save upload to temp disk for song {}", songId, e);
-            songRepository.updateStatus(songId, Song.UploadStatus.FAILED);
+            songService.updateSongStatus(songId, Song.UploadStatus.FAILED);
             throw new RuntimeException("Upload failed — could not save file", e);
         }
 
@@ -93,9 +93,7 @@ public class UploadService {
         s3StorageService.uploadFile(tempFile, rawS3Key, file.getContentType());
 
         // Update raw URL on the song record
-        Song savedSong = songRepository.findById(songId).orElseThrow();
-        savedSong.setRawFileUrl(rawS3Key);
-        songRepository.save(savedSong);
+        songService.updateRawFileUrl(songId, rawS3Key);
 
         // ── Trigger async FFmpeg transcode ────────────────────────────────
         // Returns immediately — transcode runs on background thread pool

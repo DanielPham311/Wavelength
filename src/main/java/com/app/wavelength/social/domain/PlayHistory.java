@@ -36,13 +36,13 @@ import lombok.Setter;
 public class PlayHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID ID;
+    private UUID id;
 
     @Column(name = "user_id", nullable = false)
-    private UUID userID;
+    private UUID userId;
 
     @Column(name = "song_id", nullable = false)
-    private UUID songID;
+    private UUID songId;
 
     // How many seconds the user actually listened before skipping
     @Column(name = "duration_played")
@@ -50,7 +50,7 @@ public class PlayHistory {
 
     // The signed URL used — useful for debugging stream issues
     @Column(name = "signed_url_used", length = 2048)
-    private String signedURLused;
+    private String signedUrlUsed;
 
     // Flexible analytics payload from the app
     // e.g. { "source": "home_feed", "shuffle": true, "quality": "128k" }

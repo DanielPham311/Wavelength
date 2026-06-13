@@ -34,13 +34,13 @@ import lombok.Setter;
 public class PlaylistSong {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID ID;
+    private UUID id;
 
     @Column(name = "playlist_id", nullable = false)
-    private UUID playlistID;
+    private UUID playlistId;
 
     @Column(name = "song_id", nullable = false)
-    private UUID songID;
+    private UUID songId;
 
     @Column(name = "position", nullable = false)
     private Integer position;

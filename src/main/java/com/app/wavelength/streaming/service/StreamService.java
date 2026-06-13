@@ -6,6 +6,6 @@ import com.app.wavelength.streaming.dto.StreamURLResponse;
 
 
 public interface StreamService {
-    StreamURLResponse getStreamURL(UUID songID, UUID userID);
-    String generatePresignedHlsURL(String s3Key);
+    StreamURLResponse getStreamUrl(UUID songId, UUID userId);
+    String generatePresignedHlsUrl(String s3Key);
 }

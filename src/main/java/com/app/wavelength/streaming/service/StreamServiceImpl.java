@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.app.wavelength.catalog.domain.Song;
-import com.app.wavelength.catalog.repository.SongRepository;
+import com.app.wavelength.catalog.service.SongService;
 import com.app.wavelength.storage.service.S3StorageService;
 import com.app.wavelength.streaming.dto.StreamURLResponse;
 
@@ -19,12 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StreamServiceImpl implements StreamService {
     private final S3StorageService s3StorageService;
-    private final SongRepository songRepository;
+    private final SongService songService;
 
     private static final Duration STREAM_URL_EXPIRATION = Duration.ofMinutes(15);
 
     @Override
-    public String generatePresignedHlsURL(String s3Key) {
+    public String generatePresignedHlsUrl(String s3Key) {
         return s3StorageService.generatePresignedUrl(s3Key, STREAM_URL_EXPIRATION);
     }
 
@@ -40,8 +40,8 @@ public class StreamServiceImpl implements StreamService {
     }
 
     @Override
-    public StreamURLResponse getStreamURL(UUID songID, UUID userID) {
-        Song song = songRepository.findById(songID).orElseThrow(() -> new IllegalArgumentException("Song not found" + songID) );
+    public StreamURLResponse getStreamUrl(UUID songId, UUID userId) {
+        Song song = songService.findSongById(songID);
 
         if(song.getUploadStatus() != Song.UploadStatus.READY) {
             throw new IllegalStateException("Song is not available for streaming yet. Status: " + song.getUploadStatus());

@@ -30,10 +30,10 @@ import lombok.Setter;
 public class Playlist {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID ID;
+    private UUID id;
 
     @Column(name = "owner_id", nullable = false)
-    private UUID ownerID;
+    private UUID ownerId;
 
     @Column(nullable = false, length = 255)
     private String name;
@@ -42,7 +42,7 @@ public class Playlist {
     private String description;
 
     @Column(name = "cover_url")
-    private String coverURL;
+    private String coverUrl;
 
     @Column(name = "is_public", nullable = false)
     @Builder.Default

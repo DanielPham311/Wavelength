@@ -53,21 +53,15 @@ public class SearchService {
         }
 
         if (searchAll || type.contains("artist")) {
-            artists = artistRepository.findAll().stream()
-                    .filter(a -> a.getName().toLowerCase()
-                            .contains(q.toLowerCase()))
-                    .skip(offset)
-                    .limit(limit)
+            artists = artistRepository.searchByName(q, page)
+                    .stream()
                     .map(a -> ArtistResponse.from(a, 0, 0))
                     .toList();
         }
 
         if (searchAll || type.contains("album")) {
-            albums = albumRepository.findAll().stream()
-                    .filter(a -> a.getTitle().toLowerCase()
-                            .contains(q.toLowerCase()))
-                    .skip(offset)
-                    .limit(limit)
+            albums = albumRepository.searchByTitle(q, page)
+                    .stream()
                     .map(a -> AlbumResponse.from(a, null, 0, List.of()))
                     .toList();
         }

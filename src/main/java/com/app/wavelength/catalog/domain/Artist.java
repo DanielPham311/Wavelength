@@ -40,7 +40,7 @@ public class Artist {
     private String bio;
 
     @Column(name = "avatar_url")
-    private String avatarURL;
+    private String avatarUrl;
 
     @Column(nullable = false)
     @Builder.Default

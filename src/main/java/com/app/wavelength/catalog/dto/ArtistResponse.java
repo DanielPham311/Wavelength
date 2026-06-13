@@ -8,13 +8,13 @@ public record ArtistResponse(
     UUID id,
     String name,
     String bio,
-    String avatarURL,
+    String avatarUrl,
     Boolean verified,
-    int soungCount,
+    int songCount,
     int albumCount
 ) {
     public static ArtistResponse from(Artist artist, int songCount, int albumCount) {
-        return new ArtistResponse(artist.getId(), artist.getName(), artist.getBio(), artist.getAvatarURL(),
+        return new ArtistResponse(artist.getId(), artist.getName(), artist.getBio(), artist.getAvatarUrl(),
                 artist.getVerified(), songCount, albumCount);
     }
 }
