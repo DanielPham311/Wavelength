@@ -14,11 +14,11 @@ import com.app.wavelength.library.domain.LikedSong;
 
 @Repository
 public interface LikedSongRepository extends JpaRepository<LikedSong,UUID> {
-    Page<LikedSong> findByUserIDOrderByLikedAtDesc(UUID userID, Pageable pageable); 
+    Page<LikedSong> findByUserIdOrderByLikedAtDesc(UUID userId, Pageable pageable);
 
-    Optional<LikedSong> findByUserIDAndSongID(UUID userID, UUID songID);  
+    Optional<LikedSong> findByUserIdAndSongId(UUID userId, UUID songId);
 
-    boolean existsByUserIDAndSongID(UUID userID, UUID songID);
+    boolean existsByUserIdAndSongId(UUID userId, UUID songId);
 
     @Modifying
     @Query("DELETE FROM LikedSong ls WHERE ls.userId = :userId AND ls.songId = :songId")

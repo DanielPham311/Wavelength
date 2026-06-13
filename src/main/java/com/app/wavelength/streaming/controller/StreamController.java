@@ -27,7 +27,7 @@ public class StreamController {
             @PathVariable UUID id,
             @AuthenticationPrincipal UUID userId) {
 
-        StreamURLResponse response = streamService.getStreamURL(id, userId);
+        StreamURLResponse response = streamService.getStreamUrl(id, userId);
         return ResponseEntity.ok(response);
     }
     

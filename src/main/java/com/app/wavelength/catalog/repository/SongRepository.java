@@ -17,6 +17,9 @@ public interface SongRepository extends JpaRepository<Song, UUID> {
 
     List<Song> findByArtistIdOrderByCreatedAtDesc(UUID artistId);
 
+    @Query("SELECT s FROM Song s WHERE s.artistId = :artistId ORDER BY s.createdAt DESC")
+    Page<Song> findByArtistIdOrderByCreatedAtDesc(UUID artistId, Pageable pageable);
+
     List<Song> findByAlbumIdOrderByCreatedAtAsc(UUID albumId);
 
     // Trending — ordered by trending_score descending, optionally filtered by genre

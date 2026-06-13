@@ -29,7 +29,7 @@ public class S3StorageService {
     private String bucketName;
 
     @Value("${aws.s3.public-url}")
-    private String publicURL;
+    private String publicUrl;
 
     //Upload files to S3 bucket
     public String uploadFile(Path filePath, String s3Key, String contentType) {
@@ -42,7 +42,7 @@ public class S3StorageService {
 
             s3Client.putObject(request, RequestBody.fromFile(filePath));
             log.info("Uploaded file to S3: {}", s3Key);
-            return publicURL + "/" + s3Key;
+            return publicUrl + "/" + s3Key;
         } catch (Exception e) {
             log.error("Error uploading file to S3: {}", e.getMessage());
             throw new RuntimeException("Failed to upload file to S3", e);
@@ -60,7 +60,7 @@ public class S3StorageService {
 
             s3Client.putObject(request, RequestBody.fromBytes(data));
             log.info("Uploaded byte data to S3: {}", s3Key);
-            return publicURL + "/" + s3Key;
+            return publicUrl + "/" + s3Key;
         } catch (Exception e) {
             log.error("Error uploading byte data to S3: {}", e.getMessage());
             throw new RuntimeException("Failed to upload byte data to S3", e);

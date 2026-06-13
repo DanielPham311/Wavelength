@@ -25,9 +25,9 @@ public class SongService {
     private final AlbumRepository albumRepository;
 
     @Transactional(readOnly = true)
-    public SongResponse getSongByID(UUID songID) {
-        Song song = songRepository.findById(songID)
-                .orElseThrow(() -> new IllegalArgumentException("Song not found: " + songID));
+    public SongResponse getSongById(UUID songId) {
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new IllegalArgumentException("Song not found: " + songId));
 
         String artistName = artistRepository.findById(song.getArtistId())
                 .map(Artist::getName).orElse("Unknown Artist");
@@ -54,9 +54,8 @@ public class SongService {
 
     @Transactional(readOnly = true)
     public List<SongResponse> getSongsByArtist(UUID artistId, int limit) {
-        return songRepository.findByArtistIdOrderByCreatedAtDesc(artistId)
+        return songRepository.findByArtistIdOrderByCreatedAtDesc(artistId, PageRequest.of(0, limit))
                 .stream()
-                .limit(limit)
                 .map(song -> SongResponse.from(song, null, null))
                 .toList();
     }
@@ -79,5 +78,38 @@ public class SongService {
     @Transactional
     public void incrementPlayCount(UUID songId) {
         songRepository.incrementPlayCount(songId);
+    }
+
+    // ── Methods for storage module (no direct SongRepository access) ──
+
+    @Transactional
+    public void saveSong(Song song) {
+        songRepository.save(song);
+    }
+
+    @Transactional
+    public void updateSongStatus(UUID songId, Song.UploadStatus status) {
+        songRepository.updateStatus(songId, status);
+    }
+
+    @Transactional
+    public void markSongReady(UUID songId, Song.UploadStatus status, String hlsUrl, String storagePath) {
+        songRepository.markReady(songId, status, hlsUrl, storagePath);
+    }
+
+    @Transactional
+    public void updateRawFileUrl(UUID songId, String rawFileUrl) {
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new IllegalArgumentException("Song not found: " + songId));
+        song.setRawFileUrl(rawFileUrl);
+        songRepository.save(song);
+    }
+
+    // ── Method for streaming module (no direct SongRepository access) ──
+
+    @Transactional(readOnly = true)
+    public Song findSongById(UUID songId) {
+        return songRepository.findById(songId)
+                .orElseThrow(() -> new IllegalArgumentException("Song not found: " + songId));
     }
 }

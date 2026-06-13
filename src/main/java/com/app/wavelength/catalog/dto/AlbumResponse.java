@@ -25,7 +25,7 @@ public record AlbumResponse(
                 album.getTitle(),
                 album.getArtistID(),
                 artistName,
-                album.getCoverURL(),
+                album.getCoverUrl(),
                 album.getReleaseDate(),
                 album.getType().name(),
                 trackCount,

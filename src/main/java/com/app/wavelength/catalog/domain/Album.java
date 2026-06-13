@@ -36,13 +36,13 @@ public class Album {
     private UUID id;
 
     @Column(name = "artist_id", nullable = false)
-    private UUID artistID;
+    private UUID artistId;
 
     @Column(nullable = false, length = 150)
     private String title;
 
     @Column(name= "cover_url")
-    private String coverURL;
+    private String coverUrl;
 
     @Column(name = "release_date")
     private LocalDate releaseDate;

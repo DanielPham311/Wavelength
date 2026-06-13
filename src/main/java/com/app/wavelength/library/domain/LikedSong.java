@@ -32,13 +32,13 @@ import lombok.Setter;
 public class LikedSong {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID ID;
+    private UUID id;
     
     @Column(name = "user_id", nullable = false)
-    private UUID userID;
+    private UUID userId;
 
     @Column(name = "song_id", nullable = false)
-    private UUID songID;
+    private UUID songId;
 
     @CreationTimestamp
     @Column(name = "liked_at", updatable = false)

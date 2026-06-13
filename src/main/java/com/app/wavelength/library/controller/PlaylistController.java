@@ -35,19 +35,19 @@ public class PlaylistController {
     @PostMapping
     public ResponseEntity<PlaylistResponse> create(
         @Valid @RequestBody CreatePlaylistRequest request,
-        @AuthenticationPrincipal UUID userID
+        @AuthenticationPrincipal UUID userId
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(playlistService.createPlaylist(request, userID));
+        return ResponseEntity.status(HttpStatus.CREATED).body(playlistService.createPlaylist(request, userId));
     }
     
     //GET /api/v1/playlists/{id}?includeSongs=true - Get playlist details (with optional songs)
     @GetMapping("/{id}")
     public ResponseEntity<PlaylistResponse> getPlaylist(
-        @AuthenticationPrincipal UUID userID,
+        @AuthenticationPrincipal UUID userId,
         @PathVariable UUID id,
         @RequestParam(name="include_songs", defaultValue = "false") boolean includeSongs
     ) {
-        return ResponseEntity.ok(playlistService.getByID(id, includeSongs, userID));
+        return ResponseEntity.ok(playlistService.getById(id, includeSongs, userId));
     }
 
     // PUT /api/v1/playlists/{id}/songs

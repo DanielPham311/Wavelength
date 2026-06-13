@@ -1,7 +1,7 @@
 package com.app.wavelength.storage.service;
 
 import com.app.wavelength.catalog.domain.Song;
-import com.app.wavelength.catalog.repository.SongRepository;
+import com.app.wavelength.catalog.service.SongService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -17,7 +17,7 @@ import java.util.UUID;
 public class TranscodeService {
 
     private final S3StorageService s3StorageService;
-    private final SongRepository songRepository;
+    private final SongService songService;
 
     // Runs on the transcodeExecutor thread pool — non-blocking for the upload request
     @Async("transcodeExecutor")
@@ -25,7 +25,7 @@ public class TranscodeService {
         log.info("Starting HLS transcode for song: {}", songId);
 
         // Mark as processing
-        songRepository.updateStatus(songId, Song.UploadStatus.PROCESSING);
+        songService.updateSongStatus(songId, Song.UploadStatus.PROCESSING);
 
         Path hlsOutputDir = rawFilePath.getParent().resolve("hls_" + songId);
 
@@ -62,7 +62,7 @@ public class TranscodeService {
 
             if (exitCode != 0) {
                 log.error("FFmpeg failed for song {} with exit code {}", songId, exitCode);
-                songRepository.updateStatus(songId, Song.UploadStatus.FAILED);
+                songService.updateSongStatus(songId, Song.UploadStatus.FAILED);
                 return;
             }
 
@@ -80,13 +80,13 @@ public class TranscodeService {
             );
 
             // Mark song as ready with HLS URL
-            songRepository.markReady(songId, Song.UploadStatus.READY, hlsUrl, storagePath);
+            songService.markSongReady(songId, Song.UploadStatus.READY, hlsUrl, storagePath);
 
             log.info("Song {} is now READY at {}", songId, hlsUrl);
 
         } catch (IOException | InterruptedException e) {
             log.error("Transcode failed for song: {}", songId, e);
-            songRepository.updateStatus(songId, Song.UploadStatus.FAILED);
+            songService.updateSongStatus(songId, Song.UploadStatus.FAILED);
             Thread.currentThread().interrupt();
 
         } finally {

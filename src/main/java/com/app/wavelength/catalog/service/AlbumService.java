@@ -28,7 +28,7 @@ public class AlbumService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Album not found: " + albumId));
 
-        String artistName = artistRepository.findById(album.getArtistID())
+        String artistName = artistRepository.findById(album.getArtistId())
                 .map(Artist::getName).orElse("Unknown Artist");
 
         List<SongResponse> songs = includeSongs

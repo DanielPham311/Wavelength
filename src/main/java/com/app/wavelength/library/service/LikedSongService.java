@@ -22,15 +22,15 @@ public class LikedSongService {
     private final SongService songService; 
 
     //Toggle like/unlike a song
-    public boolean toggleLike(UUID userID, UUID songID) {
-        if (likedSongRepository.existsByUserIDAndSongID(userID, songID)) {
-            likedSongRepository.deleteByUserIdAndSongId(userID, songID);
+    public boolean toggleLike(UUID userId, UUID songId) {
+        if (likedSongRepository.existsByUserIDAndSongID(userId, songId)) {
+            likedSongRepository.deleteByUserIdAndSongId(userId, songId);
             return false; // Unliked
         }
 
         LikedSong likedSong = LikedSong.builder()
-                .userID(userID)
-                .songID(songID)
+                .userId(userId)
+                .songId(songId)
                 .build();
         likedSongRepository.save(likedSong);
         return true; // Liked

@@ -23,22 +23,22 @@ public class PlayHistoryService {
     private final SongService songService;
 
     @Transactional
-    public void recordPlay(UUID userID, UUID songID, PlayAnalyticsRequest request) {
+    public void recordPlay(UUID userId, UUID songId, PlayAnalyticsRequest request) {
         // Implementation for recording play history
         PlayHistory history = new PlayHistory();
-        history.setUserID(userID);
-        history.setSongID(songID);
+        history.setUserId(userID);
+        history.setSongId(songId);
         history.setDurationPlayed(request.durationPlayed());
-        history.setSignedURLused(request.signedUrlUsed());
+        history.setSignedUrlUsed(request.signedUrlUsed());
         history.setAnalyticsData(request.analyticsData());
         playHistoryRepository.save(history);
 
         // Increment play count on the song — calls catalog module via service interface
         // Never touches SongRepository directly from social module
-        songService.incrementPlayCount(songID);
+        songService.incrementPlayCount(songId);
 
         log.info("Recorded play event — user: {}, song: {}, duration: {}s",
-                userID, songID, request.durationPlayed());
+                userID, songId, request.durationPlayed());
     }
 
     @Transactional(readOnly = true)
@@ -46,7 +46,7 @@ public class PlayHistoryService {
         return playHistoryRepository
                 .findRecentPlaysByUserId(userId, PageRequest.of(0, limit))
                 .stream()
-                .map(PlayHistory::getSongID)
+                .map(PlayHistory::getSongId)
                 .distinct()
                 .toList();
     }

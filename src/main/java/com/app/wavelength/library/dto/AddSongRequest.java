@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 public record AddSongRequest(
     @NotEmpty(message = "Song IDs list must not be empty")
-    List<UUID> songIDs,
+    List<UUID> songIds,
     Integer position
 ) {
 }

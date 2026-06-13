@@ -39,10 +39,10 @@ public class UserArtistFollow {
     private UUID id;
 
     @Column(name = "follower_id", nullable = false)
-    private UUID followerID;
+    private UUID followerId;
 
     @Column(name = "artist_id", nullable = false)
-    private UUID artistID;
+    private UUID artistId;
 
     @CreationTimestamp
     @Column(name = "followed_at", updatable = false)
