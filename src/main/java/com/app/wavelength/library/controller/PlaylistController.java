@@ -1,5 +1,9 @@
 package com.app.wavelength.library.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,20 +32,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/v1/playlists")
 @RequiredArgsConstructor
+@Tag(name = "Playlists", description = "Playlist CRUD and song management")
 public class PlaylistController {
     private final PlaylistService playlistService;
-    
-    //POST /api/v1/playlists - Create a new playlist
+
     @PostMapping
+    @Operation(summary = "Create playlist", description = "Create a new playlist for the authenticated user.")
+    @ApiResponse(responseCode = "201", description = "Playlist created")
     public ResponseEntity<PlaylistResponse> create(
         @Valid @RequestBody CreatePlaylistRequest request,
         @AuthenticationPrincipal UUID userId
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(playlistService.createPlaylist(request, userId));
     }
-    
-    //GET /api/v1/playlists/{id}?includeSongs=true - Get playlist details (with optional songs)
+
     @GetMapping("/{id}")
+    @Operation(summary = "Get playlist", description = "Return playlist metadata. Optionally include tracklist.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Playlist found"),
+            @ApiResponse(responseCode = "404", description = "Playlist not found")
+    })
     public ResponseEntity<PlaylistResponse> getPlaylist(
         @AuthenticationPrincipal UUID userId,
         @PathVariable UUID id,
@@ -50,8 +60,13 @@ public class PlaylistController {
         return ResponseEntity.ok(playlistService.getById(id, includeSongs, userId));
     }
 
-    // PUT /api/v1/playlists/{id}/songs
     @PutMapping("/{id}/songs")
+    @Operation(summary = "Add songs", description = "Add one or more songs to a playlist.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Songs added"),
+            @ApiResponse(responseCode = "404", description = "Playlist not found"),
+            @ApiResponse(responseCode = "403", description = "Not playlist owner")
+    })
     public ResponseEntity<PlaylistResponse> addSongs(
             @PathVariable UUID id,
             @Valid @RequestBody AddSongRequest request,
@@ -59,8 +74,13 @@ public class PlaylistController {
         return ResponseEntity.ok(playlistService.addSongsToPlaylist(id, request, userId));
     }
 
-    // DELETE /api/v1/playlists/{id}/songs/{songId}
     @DeleteMapping("/{id}/songs/{songId}")
+    @Operation(summary = "Remove song", description = "Remove a song from a playlist.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Song removed"),
+            @ApiResponse(responseCode = "404", description = "Playlist or song not found"),
+            @ApiResponse(responseCode = "403", description = "Not playlist owner")
+    })
     public ResponseEntity<Void> removeSong(
             @PathVariable UUID id,
             @PathVariable UUID songId,
@@ -69,8 +89,13 @@ public class PlaylistController {
         return ResponseEntity.noContent().build();
     }
 
-    // DELETE /api/v1/playlists/{id}
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete playlist", description = "Delete a playlist. Must be the owner.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Playlist deleted"),
+            @ApiResponse(responseCode = "404", description = "Playlist not found"),
+            @ApiResponse(responseCode = "403", description = "Not playlist owner")
+    })
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
             @AuthenticationPrincipal UUID userId) {

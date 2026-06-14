@@ -23,7 +23,7 @@ public record AlbumResponse(
         return new AlbumResponse(
                 album.getId(),
                 album.getTitle(),
-                album.getArtistID(),
+                album.getArtistId(),
                 artistName,
                 album.getCoverUrl(),
                 album.getReleaseDate(),

@@ -4,6 +4,10 @@ import com.app.wavelength.catalog.dto.SongResponse;
 import com.app.wavelength.library.dto.PlaylistResponse;
 import com.app.wavelength.library.service.LikedSongService;
 import com.app.wavelength.library.service.PlaylistService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,20 +20,23 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
+@Tag(name = "Library", description = "User library: playlists, liked songs, and personal catalog")
 public class LibraryController {
 
     private final PlaylistService playlistService;
     private final LikedSongService likedSongService;
 
-    // GET /api/v1/users/me/playlists
     @GetMapping("/users/me/playlists")
+    @Operation(summary = "Get my playlists", description = "Return all playlists owned by the authenticated user.")
+    @ApiResponse(responseCode = "200", description = "List of playlists")
     public ResponseEntity<List<PlaylistResponse>> getMyPlaylists(
             @AuthenticationPrincipal UUID userId) {
         return ResponseEntity.ok(playlistService.getUsersPlaylists(userId));
     }
 
-    // GET /api/v1/users/me/liked_songs?limit=50&offset=0
     @GetMapping("/users/me/liked_songs")
+    @Operation(summary = "Get liked songs", description = "Return songs liked by the authenticated user.")
+    @ApiResponse(responseCode = "200", description = "List of liked songs")
     public ResponseEntity<List<SongResponse>> getLikedSongs(
             @AuthenticationPrincipal UUID userId,
             @RequestParam(defaultValue = "50") int limit,
@@ -38,8 +45,12 @@ public class LibraryController {
                 userId, Math.min(limit, 100), offset));
     }
 
-    // POST /api/v1/songs/{id}/like — toggle like/unlike
     @PostMapping("/songs/{id}/like")
+    @Operation(summary = "Toggle like", description = "Like or unlike a song. Returns new like state.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Like toggled"),
+            @ApiResponse(responseCode = "404", description = "Song not found")
+    })
     public ResponseEntity<Map<String, Object>> toggleLike(
             @PathVariable UUID id,
             @AuthenticationPrincipal UUID userId) {
