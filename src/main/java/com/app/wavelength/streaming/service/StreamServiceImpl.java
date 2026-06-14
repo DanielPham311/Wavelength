@@ -41,7 +41,7 @@ public class StreamServiceImpl implements StreamService {
 
     @Override
     public StreamURLResponse getStreamUrl(UUID songId, UUID userId) {
-        Song song = songService.findSongById(songID);
+        Song song = songService.findSongById(songId);
 
         if(song.getUploadStatus() != Song.UploadStatus.READY) {
             throw new IllegalStateException("Song is not available for streaming yet. Status: " + song.getUploadStatus());
@@ -52,7 +52,7 @@ public class StreamServiceImpl implements StreamService {
         String s3Key = extractS3Key(song.getHlsUrl());
         String signedUrl = s3StorageService.generatePresignedUrl(s3Key, STREAM_URL_EXPIRATION);
 
-        log.info("Generated presigned URL for song {}: {}", songID, signedUrl);
+        log.info("Generated presigned URL for song {}: {}", songId, signedUrl);
 
         return new StreamURLResponse(song.getId(), song.getTitle(), signedUrl, song.getCoverUrl(), song.getDurationSeconds(), 
             Instant.now().plus(STREAM_URL_EXPIRATION));

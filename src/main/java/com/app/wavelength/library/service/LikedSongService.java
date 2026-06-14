@@ -23,7 +23,7 @@ public class LikedSongService {
 
     //Toggle like/unlike a song
     public boolean toggleLike(UUID userId, UUID songId) {
-        if (likedSongRepository.existsByUserIDAndSongID(userId, songId)) {
+        if (likedSongRepository.existsByUserIdAndSongId(userId, songId)) {
             likedSongRepository.deleteByUserIdAndSongId(userId, songId);
             return false; // Unliked
         }
@@ -39,17 +39,17 @@ public class LikedSongService {
     @Transactional(readOnly = true)
     public List<SongResponse> getLikedSongs(UUID userId, int limit, int offset) {
         Page<LikedSong> page = likedSongRepository
-                .findByUserIDOrderByLikedAtDesc(userId,
+                .findByUserIdOrderByLikedAtDesc(userId,
                         PageRequest.of(offset / limit, limit));
 
         return page.getContent()
                 .stream()
-                .map(ls -> songService.getSongByID(ls.getSongID()))
+                .map(ls -> songService.getSongById(ls.getSongId()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public boolean isLiked(UUID userId, UUID songId) {
-        return likedSongRepository.existsByUserIDAndSongID(userId, songId);
+        return likedSongRepository.existsByUserIdAndSongId(userId, songId);
     }
 }

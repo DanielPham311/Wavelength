@@ -26,7 +26,7 @@ public class PlayHistoryService {
     public void recordPlay(UUID userId, UUID songId, PlayAnalyticsRequest request) {
         // Implementation for recording play history
         PlayHistory history = new PlayHistory();
-        history.setUserId(userID);
+        history.setUserId(userId);
         history.setSongId(songId);
         history.setDurationPlayed(request.durationPlayed());
         history.setSignedUrlUsed(request.signedUrlUsed());
@@ -38,7 +38,7 @@ public class PlayHistoryService {
         songService.incrementPlayCount(songId);
 
         log.info("Recorded play event — user: {}, song: {}, duration: {}s",
-                userID, songId, request.durationPlayed());
+                userId, songId, request.durationPlayed());
     }
 
     @Transactional(readOnly = true)

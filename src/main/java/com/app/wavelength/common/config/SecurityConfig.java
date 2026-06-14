@@ -1,6 +1,6 @@
-package com.wavelength.common.config;
+package com.app.wavelength.common.config;
 
-import com.wavelength.common.security.JWTAuthFilter;
+import com.app.wavelength.common.security.JWTAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
