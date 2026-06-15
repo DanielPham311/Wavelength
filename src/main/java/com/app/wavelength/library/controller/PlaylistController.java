@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.wavelength.library.dto.AddSongRequest;
 import com.app.wavelength.library.dto.CreatePlaylistRequest;
 import com.app.wavelength.library.dto.PlaylistResponse;
+import com.app.wavelength.library.dto.UpdatePlaylistRequest;
 import com.app.wavelength.library.service.PlaylistService;
 
 import jakarta.validation.Valid;
@@ -58,6 +59,20 @@ public class PlaylistController {
         @RequestParam(name="include_songs", defaultValue = "false") boolean includeSongs
     ) {
         return ResponseEntity.ok(playlistService.getById(id, includeSongs, userId));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update playlist", description = "Update name, description, or visibility. Only non-null fields are updated.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Playlist updated"),
+            @ApiResponse(responseCode = "404", description = "Playlist not found"),
+            @ApiResponse(responseCode = "403", description = "Not playlist owner")
+    })
+    public ResponseEntity<PlaylistResponse> updatePlaylist(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdatePlaylistRequest request,
+            @AuthenticationPrincipal UUID userId) {
+        return ResponseEntity.ok(playlistService.updatePlaylist(id, request, userId));
     }
 
     @PutMapping("/{id}/songs")

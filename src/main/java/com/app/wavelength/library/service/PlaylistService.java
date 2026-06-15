@@ -14,6 +14,7 @@ import com.app.wavelength.library.domain.PlaylistSong;
 import com.app.wavelength.library.dto.AddSongRequest;
 import com.app.wavelength.library.dto.CreatePlaylistRequest;
 import com.app.wavelength.library.dto.PlaylistResponse;
+import com.app.wavelength.library.dto.UpdatePlaylistRequest;
 import com.app.wavelength.library.repository.PlaylistRepository;
 import com.app.wavelength.library.repository.PlaylistSongRepository;
 
@@ -29,7 +30,7 @@ public class PlaylistService {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private Playlist findAndAuthorize(UUID playlistId, UUID userId) {
-        Playlist playlist = playlistRepository.findById(playlistId)
+        Playlist playlist = playlistRepository.findByIdAndDeletedAtIsNull(playlistId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Playlist not found: " + playlistId));
 
@@ -84,15 +85,29 @@ public class PlaylistService {
         return PlaylistResponse.from(playlist, trackCount, songs);
     }
 
-    // Get all playlists for a user
+    // Get all playlists for a user (excludes soft-deleted) — legacy full list
     @Transactional(readOnly = true)
     public List<PlaylistResponse> getUsersPlaylists(UUID userId) {
-        return playlistRepository.findByOwnerIdOrderByUpdatedAtDesc(userId)
+        return playlistRepository.findByOwnerIdAndDeletedAtIsNullOrderByUpdatedAtDesc(userId)
                 .stream()
                 .map(p -> PlaylistResponse.from(p,
                         playlistSongRepository.countByPlaylistId(p.getId()),
                         List.of()))
                 .toList();
+    }
+
+    // Get paginated playlists for a user
+    @Transactional(readOnly = true)
+    public com.app.wavelength.common.dto.PaginatedResponse<PlaylistResponse> getUsersPlaylistsPaginated(UUID userId, int limit, int offset) {
+        org.springframework.data.domain.Pageable page = org.springframework.data.domain.PageRequest.of(offset / limit, limit);
+        long total = playlistRepository.countByOwnerIdAndDeletedAtIsNull(userId);
+        List<PlaylistResponse> content = playlistRepository.findByOwnerIdAndDeletedAtIsNullOrderByUpdatedAtDesc(userId, page)
+                .stream()
+                .map(p -> PlaylistResponse.from(p,
+                        playlistSongRepository.countByPlaylistId(p.getId()),
+                        List.of()))
+                .toList();
+        return new com.app.wavelength.common.dto.PaginatedResponse<>(content, total, limit, offset);
     }
 
     // Add songs (bulk, with position handling)
@@ -131,10 +146,31 @@ public class PlaylistService {
         playlistSongRepository.deleteByPlaylistIdAndSongId(playlistId, songId);
     }
 
-    //Delete playlist
+    //Update playlist
+    @Transactional
+    public PlaylistResponse updatePlaylist(UUID playlistId, UpdatePlaylistRequest request, UUID userId) {
+        Playlist playlist = findAndAuthorize(playlistId, userId);
+
+        if (request.name() != null && !request.name().isBlank()) {
+            playlist.setName(request.name().trim());
+        }
+        if (request.description() != null) {
+            playlist.setDescription(request.description());
+        }
+        if (request.isPublic() != null) {
+            playlist.setIsPublic(request.isPublic());
+        }
+
+        playlistRepository.save(playlist);
+        int trackCount = playlistSongRepository.countByPlaylistId(playlistId);
+        return PlaylistResponse.from(playlist, trackCount, List.of());
+    }
+
+    //Delete playlist (soft delete)
     @Transactional
     public void delete(UUID playlistId, UUID userId) {
         Playlist playlist = findAndAuthorize(playlistId, userId);
-        playlistRepository.delete(playlist);
+        playlist.softDelete();
+        playlistRepository.save(playlist);
     }
 }

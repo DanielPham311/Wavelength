@@ -17,4 +17,7 @@ public interface AlbumRepository extends JpaRepository<Album, UUID> {
 
     @Query("SELECT a FROM Album a WHERE LOWER(a.title) LIKE LOWER(CONCAT('%', :query, '%')) ORDER BY a.title")
     Page<Album> searchByTitle(String query, Pageable pageable);
+
+    @Query("SELECT COUNT(a) FROM Album a WHERE LOWER(a.title) LIKE LOWER(CONCAT('%', :query, '%'))")
+    long countByTitle(String query);
 }

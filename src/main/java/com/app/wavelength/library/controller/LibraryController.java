@@ -1,6 +1,7 @@
 package com.app.wavelength.library.controller;
 
 import com.app.wavelength.catalog.dto.SongResponse;
+import com.app.wavelength.common.dto.PaginatedResponse;
 import com.app.wavelength.library.dto.PlaylistResponse;
 import com.app.wavelength.library.service.LikedSongService;
 import com.app.wavelength.library.service.PlaylistService;
@@ -27,22 +28,27 @@ public class LibraryController {
     private final LikedSongService likedSongService;
 
     @GetMapping("/users/me/playlists")
-    @Operation(summary = "Get my playlists", description = "Return all playlists owned by the authenticated user.")
-    @ApiResponse(responseCode = "200", description = "List of playlists")
-    public ResponseEntity<List<PlaylistResponse>> getMyPlaylists(
-            @AuthenticationPrincipal UUID userId) {
-        return ResponseEntity.ok(playlistService.getUsersPlaylists(userId));
+    @Operation(summary = "Get my playlists", description = "Return paginated playlists owned by the authenticated user.")
+    @ApiResponse(responseCode = "200", description = "Paginated list of playlists")
+    public ResponseEntity<PaginatedResponse<PlaylistResponse>> getMyPlaylists(
+            @AuthenticationPrincipal UUID userId,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
+        return ResponseEntity.ok(playlistService.getUsersPlaylistsPaginated(
+                userId, Math.min(limit, 50), offset));
     }
 
     @GetMapping("/users/me/liked_songs")
-    @Operation(summary = "Get liked songs", description = "Return songs liked by the authenticated user.")
-    @ApiResponse(responseCode = "200", description = "List of liked songs")
-    public ResponseEntity<List<SongResponse>> getLikedSongs(
+    @Operation(summary = "Get liked songs", description = "Return paginated songs liked by the authenticated user.")
+    @ApiResponse(responseCode = "200", description = "Paginated list of liked songs")
+    public ResponseEntity<PaginatedResponse<SongResponse>> getLikedSongs(
             @AuthenticationPrincipal UUID userId,
             @RequestParam(defaultValue = "50") int limit,
             @RequestParam(defaultValue = "0") int offset) {
-        return ResponseEntity.ok(likedSongService.getLikedSongs(
-                userId, Math.min(limit, 100), offset));
+        List<SongResponse> songs = likedSongService.getLikedSongs(
+                userId, Math.min(limit, 100), offset);
+        long total = likedSongService.getLikedSongsCount(userId);
+        return ResponseEntity.ok(new PaginatedResponse<>(songs, total, limit, offset));
     }
 
     @PostMapping("/songs/{id}/like")

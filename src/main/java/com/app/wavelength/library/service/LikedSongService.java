@@ -52,4 +52,9 @@ public class LikedSongService {
     public boolean isLiked(UUID userId, UUID songId) {
         return likedSongRepository.existsByUserIdAndSongId(userId, songId);
     }
+
+    @Transactional(readOnly = true)
+    public long getLikedSongsCount(UUID userId) {
+        return likedSongRepository.countByUserId(userId);
+    }
 }

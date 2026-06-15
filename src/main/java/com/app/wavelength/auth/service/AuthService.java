@@ -5,6 +5,8 @@ import com.app.wavelength.auth.domain.User;
 import com.app.wavelength.auth.dto.AuthResponse;
 import com.app.wavelength.auth.dto.LoginRequest;
 import com.app.wavelength.auth.dto.RegisterRequest;
+import com.app.wavelength.auth.dto.UpdateProfileRequest;
+import com.app.wavelength.auth.dto.UserProfileResponse;
 import com.app.wavelength.auth.repository.RefreshTokenRepository;
 import com.app.wavelength.auth.repository.UserRepository;
 import com.app.wavelength.common.security.JWTUtil;
@@ -33,7 +35,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
-        if (userRepository.existsByEmail(req.email())) {
+        if (userRepository.existsByEmailAndDeletedAtIsNull(req.email())) {
             throw new IllegalArgumentException("An account with this email already exists");
         }
 
@@ -50,7 +52,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest req) {
-        User user = userRepository.findByEmail(req.email().toLowerCase().trim())
+        User user = userRepository.findByEmailAndDeletedAtIsNull(req.email().toLowerCase().trim())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
         if (!passwordEncoder.matches(req.password(), user.getPasswordHash())) {
@@ -80,9 +82,35 @@ public class AuthService {
         return issueTokenPair(storedToken.getUser());
     }
 
+    @Transactional(readOnly = true)
+    public UserProfileResponse getProfile(UUID userId) {
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return toProfileResponse(user);
+    }
+
+    @Transactional
+    public UserProfileResponse updateProfile(UUID userId, UpdateProfileRequest req) {
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (req.displayName() != null && !req.displayName().isBlank()) {
+            user.setDisplayName(req.displayName().trim());
+        }
+        if (req.avatarUrl() != null) {
+            user.setAvatarURL(req.avatarUrl().trim());
+        }
+        if (req.bitratePref() != null) {
+            user.setBitratePref(req.bitratePref());
+        }
+
+        userRepository.save(user);
+        return toProfileResponse(user);
+    }
+
     @Transactional
     public void logout(UUID userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         refreshTokenRepository.deleteAllByUser(user);
     }
@@ -105,6 +133,14 @@ public class AuthService {
                 .expiresAt(jwtUtil.extractExpiration(rawToken).toInstant())
                 .build();
         refreshTokenRepository.save(entity);
+    }
+
+    private UserProfileResponse toProfileResponse(User user) {
+        return new UserProfileResponse(
+                user.getID(), user.getEmail(), user.getDisplayName(),
+                user.getAvatarUrl(), user.getRole().name(),
+                user.getBitratePref(), user.getCreatedAt(), user.getUpdatedAt()
+        );
     }
 
     private String hashToken(String token) {
