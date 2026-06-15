@@ -19,4 +19,7 @@ public interface ArtistRepository extends JpaRepository<Artist, UUID> {
 
     @Query("SELECT a FROM Artist a WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :query, '%')) ORDER BY a.name")
     Page<Artist> searchByName(String query, Pageable pageable);
+
+    @Query("SELECT COUNT(a) FROM Artist a WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :query, '%'))")
+    long countByName(String query);
 }

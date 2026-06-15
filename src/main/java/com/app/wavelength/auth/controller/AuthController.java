@@ -3,6 +3,8 @@ package com.app.wavelength.auth.controller;
 import com.app.wavelength.auth.dto.AuthResponse;
 import com.app.wavelength.auth.dto.LoginRequest;
 import com.app.wavelength.auth.dto.RegisterRequest;
+import com.app.wavelength.auth.dto.UpdateProfileRequest;
+import com.app.wavelength.auth.dto.UserProfileResponse;
 import com.app.wavelength.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -70,9 +72,22 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Current user", description = "Return the authenticated user's ID.")
+    @Operation(summary = "Current user profile", description = "Return the authenticated user's full profile.")
     @ApiResponse(responseCode = "200", description = "Authenticated")
-    public ResponseEntity<Map<String, Object>> me(@AuthenticationPrincipal UUID userId) {
-        return ResponseEntity.ok(Map.of("userId", userId, "authenticated", true));
+    public ResponseEntity<UserProfileResponse> me(@AuthenticationPrincipal UUID userId) {
+        return ResponseEntity.ok(authService.getProfile(userId));
+    }
+
+    @PutMapping("/me")
+    @Operation(summary = "Update profile", description = "Update display name, avatar URL, or bitrate preference. Only non-null fields are updated.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Profile updated"),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public ResponseEntity<UserProfileResponse> updateProfile(
+            @AuthenticationPrincipal UUID userId,
+            @Valid @RequestBody UpdateProfileRequest request) {
+        return ResponseEntity.ok(authService.updateProfile(userId, request));
     }
 }

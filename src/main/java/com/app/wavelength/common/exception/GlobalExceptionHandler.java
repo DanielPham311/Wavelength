@@ -36,6 +36,14 @@ public class GlobalExceptionHandler {
                 "timestamp", Instant.now().toString()));
     }
 
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<Map<String, Object>> handleSecurity(
+            SecurityException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                "status", 403, "error", ex.getMessage(),
+                "timestamp", Instant.now().toString()));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(
             IllegalArgumentException ex) {

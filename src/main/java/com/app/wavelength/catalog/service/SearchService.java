@@ -41,6 +41,10 @@ public class SearchService {
 
         PageRequest page = PageRequest.of(offset / limit, limit);
 
+        long totalSongs  = 0;
+        long totalArtists = 0;
+        long totalAlbums  = 0;
+
         if (searchAll || type.contains("song")) {
             songs = songRepository.searchByTitle(q, page)
                     .stream()
@@ -50,6 +54,7 @@ public class SearchService {
                         return SongResponse.from(song, artistName, null);
                     })
                     .toList();
+            totalSongs = songRepository.countByTitle(q);
         }
 
         if (searchAll || type.contains("artist")) {
@@ -57,6 +62,7 @@ public class SearchService {
                     .stream()
                     .map(a -> ArtistResponse.from(a, 0, 0))
                     .toList();
+            totalArtists = artistRepository.countByName(q);
         }
 
         if (searchAll || type.contains("album")) {
@@ -64,11 +70,12 @@ public class SearchService {
                     .stream()
                     .map(a -> AlbumResponse.from(a, null, 0, List.of()))
                     .toList();
+            totalAlbums = albumRepository.countByTitle(q);
         }
 
         return new SearchResponse(
                 songs, artists, albums,
-                songs.size(), artists.size(), albums.size(),
+                (int) totalSongs, (int) totalArtists, (int) totalAlbums,
                 limit, offset
         );
     }

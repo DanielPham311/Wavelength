@@ -49,4 +49,9 @@ public interface SongRepository extends JpaRepository<Song, UUID> {
     @Modifying
     @Query("UPDATE Song s SET s.trendingScore = :score WHERE s.id = :songId")
     void updateTrendingScore(UUID songId, Float score);
+
+    // Count total matching songs for pagination metadata
+    @Query("SELECT COUNT(s) FROM Song s WHERE s.uploadStatus = 'READY' " +
+           "AND LOWER(s.title) LIKE LOWER(CONCAT('%', :query, '%'))")
+    long countByTitle(String query);
 }

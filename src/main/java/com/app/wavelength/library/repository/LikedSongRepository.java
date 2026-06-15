@@ -23,4 +23,6 @@ public interface LikedSongRepository extends JpaRepository<LikedSong,UUID> {
     @Modifying
     @Query("DELETE FROM LikedSong ls WHERE ls.userId = :userId AND ls.songId = :songId")
     void deleteByUserIdAndSongId(UUID userId, UUID songId);
+
+    long countByUserId(UUID userId);
 }
